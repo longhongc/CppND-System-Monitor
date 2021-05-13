@@ -19,6 +19,7 @@ class Processor {
     double idle_time{0}; 
   };
   TimeInfo prevtime_;
+  TimeInfo temptime_; 
   TimeInfo nowtime_; 
 };
 

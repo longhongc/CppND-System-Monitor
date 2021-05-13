@@ -11,17 +11,15 @@ using std::string;
 using std::stoi; 
 using std::vector; 
 
-// TODO: Complete this helper function
 // INPUT: Long int measuring seconds
 // OUTPUT: HH:MM:SS
-// REMOVE: [[maybe_unused]] once you define the function
 string Format::ElapsedTime(long seconds) {
     double days = double(seconds)/60/60/24; 
     double hours = (days - int(days))*24; 
     double minutes = (hours - int(hours))*60;
     seconds = (minutes - int(minutes))*60;
     std::ostringstream datetimestream; 
-    datetimestream << int(days) << "d "
+    datetimestream
       << std::setfill('0') << std::setw(2) << int(hours) << ":"
       << std::setfill('0') << std::setw(2) << int(minutes) << ":"  
       << std::setfill('0') << std::setw(2) << seconds; 

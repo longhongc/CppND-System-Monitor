@@ -2,15 +2,19 @@
 #include "linux_parser.h"
 #include "format.h"
 
-// TODO: Return the aggregate CPU utilization
 float Processor::Utilization() {
     UpdateTimeInfo(); 
     int time_interval = nowtime_.uptime - prevtime_.uptime; 
     double totald = nowtime_.cpu_time - prevtime_.cpu_time; 
     double idled = nowtime_.idle_time - prevtime_.idle_time; 
     auto CPU_Percentage = (totald - idled)/totald; 
+    
+    // update temp before prev, to always remain at least 1 Cycle time between prev and now. 
     if (time_interval > CPU_UTIL_UPDATE_CYCLE){
-        prevtime_ = nowtime_; 
+        temptime_ = nowtime_; 
+    }
+    if (time_interval > CPU_UTIL_UPDATE_CYCLE * 2){
+        prevtime_ = temptime_; 
     }
     return (float)CPU_Percentage; 
 }
