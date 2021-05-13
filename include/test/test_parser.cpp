@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <algorithm>
 #include <unistd.h>
@@ -156,13 +157,89 @@ string ChangeTime(long seconds){
     return datetimestream.str(); 
 }
 
+long UpTime(int pid) {
+    string line; 
+    string temp; 
+    string uptime; 
+    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatFilename); 
+    if (filestream.is_open()){
+        std::getline(filestream, line); 
+        std::istringstream linestream(line); 
+        for(int i=0; i<21; i++){
+            linestream >> temp; 
+        }
+        linestream >> uptime; 
+        return stoi(uptime); 
+    }
+    return -1; 
+}
+string User(int pid) {
+    string line;
+    string user;
+    string pw; 
+    string uid; 
+    std::map<string, string> uid_user; 
+    // parse /etc/passwd to find user: uid
+    std::ifstream userstream(kPasswordPath); 
+    if(userstream.is_open()){
+        while(std::getline(userstream, line)){
+            std::replace(line.begin(), line.end(), ':', ' '); 
+            std::istringstream linestream(line); 
+            linestream >> user >> pw >> uid; 
+            uid_user[uid] = user; 
+        }
+    }
+    string key;
+    string value; 
+    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename); 
+    if(filestream.is_open()){
+        while(std::getline(filestream, line)){
+            std::replace(line.begin(), line.end(), ':', ' '); 
+            std::istringstream linestream(line); 
+            if(linestream >> key >> value){
+                if(key == "Uid"){
+                    return uid_user[value]; 
+                }
+            }
+        }
 
-
+    }
+    return ""; 
+}
+string Ram(int pid) {
+    string line;
+    string key;
+    string value; 
+    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename); 
+    if(filestream.is_open()){
+        while(std::getline(filestream, line)){
+            std::replace(line.begin(), line.end(), ':', ' '); 
+            std::istringstream linestream(line); 
+            if(linestream >> key >> value){
+                if(key == "VmSize"){
+                    return value; 
+                }
+            }
+        }
+    }
+    return ""; 
+}
+string Command(int pid) {
+    string line; 
+    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kCmdlineFilename); 
+    if(filestream.is_open()){
+        std::getline(filestream, line); 
+        return line; 
+    }
+    return " "; 
+}
 int main(){
     //std::cout << ChangeTime(26170) << std::endl; 
     //std::cout << OperatingSystem() << std::endl; 
-    std::cout << MemoryUtilization() << std::endl; 
-    //std::cout << UpTime() << std::endl; 
+    //std::cout << MemoryUtilization() << std::endl; 
+    //std::cout << UpTime(278) << std::endl; 
+    //std::cout << Ram(279) << std::endl; 
+    std::cout << Command(279) << std::endl; 
     //auto test_cpu_data = CpuUtilization(); 
     //std::cout << test_cpu_data[0] << std::endl; 
     //std::cout << test_cpu_data[1] << std::endl; 
