@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "process.h"
 #include "processor.h"
@@ -15,16 +16,26 @@ using std::string;
 using std::vector;
 
 float System::CpuUtilization() {
-   return cpu_.Utilization(); 
+    return cpu_.Utilization(); 
 }
- 
-// TODO: Return a container composed of the system's processes
+
 vector<Process>& System::Processes() {
+    processes_.clear(); 
     auto pids = LinuxParser::Pids(); 
-    for(auto &pid: pids){
-        Process process{pid}; 
-        processes_.push_back(process); 
+    std::map<int, Process > new_process_map = {}; 
+    for(const auto &pid: pids){
+        if(process_map_.find(pid) != process_map_.end()){
+            new_process_map[pid] = process_map_[pid]; 
+        }else{
+            Process process{pid}; 
+            new_process_map[pid] = process; 
+        }
     }
+    for(const auto process: new_process_map){
+        processes_.push_back(process.second); 
+    }
+    process_map_ = new_process_map; 
+    std::sort(processes_.begin(), processes_.end(), std::greater<Process>()); 
     return processes_; 
 }
 

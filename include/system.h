@@ -3,27 +3,26 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "process.h"
 #include "processor.h"
 
-
-
 class System {
  public:
-  float CpuUtilization();             
-  std::vector<Process>& Processes();  //ToDo
-  float MemoryUtilization();        
-  long UpTime();                   
-  int TotalProcesses();           
-  int RunningProcesses();        
-  std::string Kernel();         
+  float CpuUtilization();
+  std::vector<Process>& Processes();
+  float MemoryUtilization();
+  long UpTime();
+  int TotalProcesses();
+  int RunningProcesses();
+  std::string Kernel();
   std::string OperatingSystem();
 
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};
-
+  std::map<int, Process > process_map_ = {}; 
 };
 
 #endif
