@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 #include "format.h"
 #include "ncurses_display.h"
@@ -53,7 +54,7 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window) {
   wrefresh(window);
 }
 
-void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
+void NCursesDisplay::DisplayProcesses(std::vector<Process*>& processes,
                                       WINDOW* window, int n) {
   int row{0};
   int const pid_column{2};
@@ -71,7 +72,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   mvwprintw(window, row, command_column, "COMMAND");
   wattroff(window, COLOR_PAIR(2));
 
-  string empty_string(20, ' '); 
+  string empty_string(50, ' '); 
   for (int i = 2; i < n+2; ++i) {
     mvwprintw(window, i, pid_column, empty_string.c_str());
     mvwprintw(window, i, user_column, empty_string.c_str());
@@ -82,17 +83,17 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   }
 
   int size = processes.size(); 
-  n = std::min(size-1, n); 
+  n = std::min(size, n); 
   for (int i = 0; i < n; ++i) {
-    mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
-    mvwprintw(window, row, user_column, processes[i].User().c_str());
-    float cpu = processes[i].CpuUtilization() * 100;
+    mvwprintw(window, ++row, pid_column, to_string(processes[i]->Pid()).c_str());
+    mvwprintw(window, row, user_column, processes[i]->User().c_str());
+    float cpu = processes[i]->CpuUtilization() * 100;
     mvwprintw(window, row, cpu_column, to_string(cpu).substr(0, 4).c_str());
-    mvwprintw(window, row, ram_column, processes[i].Ram().c_str());
+    mvwprintw(window, row, ram_column, processes[i]->Ram().c_str());
     mvwprintw(window, row, time_column,
-              Format::ElapsedTime(processes[i].UpTime()).c_str());
+              Format::ElapsedTime(processes[i]->UpTime()).c_str());
     mvwprintw(window, row, command_column,
-              processes[i].Command().substr(0, window->_maxx - 51).c_str());
+              processes[i]->Command().substr(0, window->_maxx - 51).c_str());
   }
 }
 

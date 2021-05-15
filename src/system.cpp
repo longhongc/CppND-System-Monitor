@@ -19,23 +19,30 @@ float System::CpuUtilization() {
     return cpu_.Utilization(); 
 }
 
-vector<Process>& System::Processes() {
+bool IsGreater(Process *a, Process *b){
+    return a->cpu_percentage_> b->cpu_percentage_; 
+}
+
+vector<Process *>& System::Processes() {
     processes_.clear(); 
     auto pids = LinuxParser::Pids(); 
-    std::map<int, Process > new_process_map = {}; 
     for(const auto &pid: pids){
-        if(process_map_.find(pid) != process_map_.end()){
-            new_process_map[pid] = process_map_[pid]; 
-        }else{
-            Process process{pid}; 
-            new_process_map[pid] = process; 
+        if(process_map_.find(pid) == process_map_.end()){
+            Process *process_ptr = new Process(pid);  
+            process_map_[pid] = process_ptr; 
         }
     }
-    for(const auto process: new_process_map){
-        processes_.push_back(process.second); 
+    for(auto it = process_map_.begin(); it != process_map_.end();){
+        auto p = std::find(pids.begin(), pids.end(), it->first); 
+        if(p==pids.end()){
+            delete it->second; 
+            it = process_map_.erase(it); 
+        }else{
+            processes_.push_back(it->second);
+            ++it; 
+        }
     }
-    process_map_ = new_process_map; 
-    std::sort(processes_.begin(), processes_.end(), std::greater<Process>()); 
+    std::sort(processes_.begin(), processes_.end(),IsGreater); 
     return processes_; 
 }
 

@@ -3,5 +3,6 @@
 
 int main() {
   System system;
+  auto processes = system.Processes(); 
   NCursesDisplay::Display(system);
 }

@@ -11,7 +11,7 @@
 class System {
  public:
   float CpuUtilization();
-  std::vector<Process>& Processes();
+  std::vector<Process*>& Processes();
   float MemoryUtilization();
   long UpTime();
   int TotalProcesses();
@@ -21,8 +21,8 @@ class System {
 
  private:
   Processor cpu_ = {};
-  std::vector<Process> processes_ = {};
-  std::map<int, Process > process_map_ = {}; 
+  std::vector<Process*> processes_ = {};
+  std::map<int, Process *> process_map_ = {}; 
 };
 
 #endif

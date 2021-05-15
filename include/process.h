@@ -20,10 +20,12 @@ class Process {
   bool operator<(const Process &a) const ;
   bool operator==(const Process &a) const ;
   bool operator>(const Process &a) const ;
+  double cpu_percentage_{0.0}; 
+  ~Process(){}
+  
 
  private:
   int pid_{0};
-  double cpu_percentage_{0.0}; 
 
   std::map<std::string, double> process_data_;
   void UpdateTimeInfo();
