@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <iomanip>
 
+#define debug(x) std::cout<< "Var " << (#x) << ": " << x << std::endl  
+
 using std::stoi; 
 using std::stol; 
 using std::string;
@@ -24,69 +26,50 @@ const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
 
+string FindParameter(string filename, int row, int col, char separator = ' '){
+    string line;
+    string param; 
+    std::ifstream filestream(filename);
+    if(filestream.is_open()){
+        for(int i=0; i<row; i++){
+            std::getline(filestream, line); 
+        }
+        if(separator != ' '){
+            std::replace(line.begin(), line.end(), ' ', '_'); 
+            std::replace(line.begin(), line.end(), separator, ' '); 
+        }
+        std::istringstream linestream(line); 
+        for(int i=0; i<col; i++){
+            linestream >> param; 
+        }
+        if(separator != ' '){
+            std::replace(param.begin(), param.end(), '_', ' '); 
+        }
+        return param; 
+    }
+    return {}; 
+}
 
 string OperatingSystem(){
-    string line;
-    string key;
-    string value;
-    std::ifstream filestream(kOSPath);
-    if (filestream.is_open()){
-        while (std::getline(filestream, line)){
-            std::replace(line.begin(), line.end(), ' ', '_');
-            std::replace(line.begin(), line.end(), '=', ' ');
-            std::replace(line.begin(), line.end(), '"', ' ');
-            std::istringstream linestream(line);
-            while (linestream >> key >> value){
-                if (key == "PRETTY_NAME"){
-                    std::replace(value.begin(), value.end(), '_', ' ');
-                    return value;
-                }
-            }
-
-        }
-    }
-    return value; 
+    string os = FindParameter(kOSPath, 5, 2, '=');  
+    return os.substr(1, os.size()-2); 
 }
 
 float MemoryUtilization(){
-    string line;
-    string key;
-    int value; 
-    double memtotal;
-    double memfree;
-    std::ifstream filestream(kProcDirectory + kMeminfoFilename);
-    if (filestream.is_open()){
-        while (std::getline(filestream, line)){
-            std::replace(line.begin(), line.end(), ':', ' ');
-            std::istringstream linestream(line);
-            while (linestream >> key >> value){
-                if (key == "MemTotal"){
-                    memtotal = value; 
-                }
-                if (key == "MemFree"){
-                    memfree = value; 
-                    return (memtotal - memfree)/memtotal; 
-                }
-            }
-
-        }
+    string memtotal = FindParameter(kProcDirectory + kMeminfoFilename, 1, 2); 
+    string memfree = FindParameter(kProcDirectory + kMeminfoFilename, 2, 2); 
+    if(!memtotal.empty() && !memfree.empty()){
+        return static_cast<float>(stoi(memtotal) - stoi(memfree)) / stoi(memtotal); 
     }
     return -1; 
 }
 
 long UpTime(){
-    string line;
-    string uptime;
-    string idletime; 
-    std::ifstream filestream(kProcDirectory + kUptimeFilename);
-    if (filestream.is_open()){
-        std::getline(filestream, line); 
-        std::istringstream linestream(line);
-        linestream >> uptime >> idletime; 
+    string uptime = FindParameter(kProcDirectory + kUptimeFilename, 1, 1);  
+    if (!uptime.empty()){
+        return stol(uptime); 
     }
-    
-    return stol(uptime); 
-
+    return -1; 
 }
 
 vector<string> CpuUtilization(){
@@ -106,42 +89,19 @@ vector<string> CpuUtilization(){
 }
 
 int TotalProcesses(){
-    string line;
-    string key;
-    string value; 
-    std::ifstream filestream(kProcDirectory + kStatFilename);
-    if (filestream.is_open()){
-        while (std::getline(filestream, line)){
-            std::istringstream linestream(line);
-            while (linestream >> key >> value){
-                if (key == "processes"){
-                    return stoi(value); 
-                }
-            }
-
-        }
+    string running = FindParameter(kProcDirectory + kStatFilename, 9, 2); 
+    if(!running.empty()){
+        return stoi(running); 
     }
-    return -1; 
+    return -1;
 }
 
 int RunningProcesses(){
-    string line;
-    string key;
-    string value; 
-    std::ifstream filestream(kProcDirectory + kStatFilename);
-    if (filestream.is_open()){
-        while (std::getline(filestream, line)){
-            std::istringstream linestream(line);
-            while (linestream >> key >> value){
-                if (key == "procs_running"){
-                    return stoi(value); 
-                }
-            }
-
-        }
+    string running = FindParameter(kProcDirectory + kStatFilename, 10, 2); 
+    if(!running.empty()){
+        return stoi(running); 
     }
     return -1; 
-
 }
 
 string ChangeTime(long seconds){
@@ -158,21 +118,13 @@ string ChangeTime(long seconds){
 }
 
 long UpTime(int pid) {
-    string line; 
-    string temp; 
-    string uptime; 
-    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatFilename); 
-    if (filestream.is_open()){
-        std::getline(filestream, line); 
-        std::istringstream linestream(line); 
-        for(int i=0; i<21; i++){
-            linestream >> temp; 
-        }
-        linestream >> uptime; 
-        return stoi(uptime); 
+    string starttime = FindParameter(kProcDirectory + std::to_string(pid) + kStatFilename, 1, 22); 
+    if(!starttime.empty()){
+        return stoi(starttime); 
     }
     return -1; 
 }
+
 string User(int pid) {
     string line;
     string user;
@@ -207,45 +159,29 @@ string User(int pid) {
     return ""; 
 }
 string Ram(int pid) {
-    string line;
-    string key;
-    string value; 
-    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename); 
-    if(filestream.is_open()){
-        while(std::getline(filestream, line)){
-            std::replace(line.begin(), line.end(), ':', ' '); 
-            std::istringstream linestream(line); 
-            if(linestream >> key >> value){
-                if(key == "VmSize"){
-                    return value; 
-                }
-            }
-        }
-    }
-    return ""; 
+    string ram = FindParameter(kProcDirectory + std::to_string(pid) + kStatusFilename, 16, 2); 
+    return ram; 
 }
 string Command(int pid) {
-    string line; 
-    std::ifstream filestream(kProcDirectory + std::to_string(pid) + kCmdlineFilename); 
-    if(filestream.is_open()){
-        std::getline(filestream, line); 
-        return line; 
+    string command = FindParameter(kProcDirectory + std::to_string(pid) + kCmdlineFilename, 9, 2); 
+    if(command.size()>30){
+        return command.substr(0, 30) + "..."; 
     }
-    return " "; 
+    return command; 
 }
 int main(){
     //std::cout << ChangeTime(26170) << std::endl; 
-    //std::cout << OperatingSystem() << std::endl; 
-    //std::cout << MemoryUtilization() << std::endl; 
-    //std::cout << UpTime(278) << std::endl; 
-    //std::cout << Ram(279) << std::endl; 
-    std::cout << Command(279) << std::endl; 
+    std::cout << OperatingSystem() << std::endl; 
+    std::cout << MemoryUtilization() << std::endl; 
+    std::cout << UpTime(916) << std::endl; 
+    std::cout << Ram(916) << std::endl; 
+    std::cout << Command(916) << std::endl; 
     //auto test_cpu_data = CpuUtilization(); 
     //std::cout << test_cpu_data[0] << std::endl; 
     //std::cout << test_cpu_data[1] << std::endl; 
     //std::cout << test_cpu_data[10] << std::endl; 
-    //std::cout << TotalProcesses() << std::endl; 
-    //std::cout << RunningProcesses() << std::endl; 
+    std::cout << TotalProcesses() << std::endl; 
+    std::cout << RunningProcesses() << std::endl; 
 
     return 0; 
 }

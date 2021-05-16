@@ -18,6 +18,8 @@ const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
 
+std::string FindParameter(std::string filename, int row, int col, char separator);
+
 // System
 float MemoryUtilization();
 long UpTime();
@@ -36,7 +38,7 @@ std::string Command(int pid);
 std::string Ram(int pid);
 std::string Uid(int pid);
 std::string User(int pid);
-long int StartTime(int pid);
+float StartTime(int pid);
 };  // namespace LinuxParser
 
 #endif
