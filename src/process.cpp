@@ -39,7 +39,11 @@ string Process::Ram() const  { return LinuxParser::Ram(pid_); }
 
 string Process::User() const  { return LinuxParser::User(pid_); }
 
-long int Process::UpTime() const  { return LinuxParser::UpTime(pid_)/sysconf(_SC_CLK_TCK); }
+long int Process::UpTime() const  {
+    auto system_uptime = LinuxParser::UpTime(); 
+    auto process_starttime = LinuxParser::StartTime(pid_)/sysconf(_SC_CLK_TCK);
+    return system_uptime - process_starttime; 
+}
 
 bool Process::operator<(const Process &a) const {
   //return pid_ < a.Pid();
@@ -61,7 +65,7 @@ bool Process::operator==(const Process &a) const {
 
 void Process::UpdateTimeInfo() {
   if (prevtime_.uptime == 0) {
-    prevtime_.uptime = this->UpTime();
+    prevtime_.uptime = LinuxParser::StartTime(pid_);
     temptime_.uptime = prevtime_.uptime; 
   }
   nowtime_.uptime = LinuxParser::UpTime();

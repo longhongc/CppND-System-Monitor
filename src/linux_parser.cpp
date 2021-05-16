@@ -260,10 +260,10 @@ string LinuxParser::User(int pid) {
   return uid_user[LinuxParser::Uid(pid)];
 }
 
-long LinuxParser::UpTime(int pid) {
+long LinuxParser::StartTime(int pid) {
   string line;
   string temp;
-  string uptime;
+  string starttime;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) +
                            kStatFilename);
   if (filestream.is_open()) {
@@ -272,8 +272,8 @@ long LinuxParser::UpTime(int pid) {
     for (int i = 0; i < 21; i++) {
       linestream >> temp;
     }
-    linestream >> uptime;
-    return stoi(uptime);
+    linestream >> starttime;
+    return stoi(starttime);
   }
   return -1;
 }
