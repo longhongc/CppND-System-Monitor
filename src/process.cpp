@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <cctype>
 #include <sstream>
 #include <string>
@@ -30,7 +29,7 @@ float Process::CpuUtilization() {
       prevtime_ = temptime_; 
       temptime_ = nowtime_;
   }
-  return (float)CPU_Percentage;
+  return static_cast<float>(CPU_Percentage);
 }
 
 string Process::Command() const  { return LinuxParser::Command(pid_); }
@@ -41,7 +40,7 @@ string Process::User() const  { return LinuxParser::User(pid_); }
 
 long int Process::UpTime() const  {
     auto system_uptime = LinuxParser::UpTime(); 
-    auto process_starttime = LinuxParser::StartTime(pid_)/sysconf(_SC_CLK_TCK);
+    auto process_starttime = LinuxParser::StartTime(pid_);
     return system_uptime - process_starttime; 
 }
 
