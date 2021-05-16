@@ -59,8 +59,6 @@ bool Process::operator>(const Process &a) const {
 
 bool Process::operator==(const Process &a) const {
   return pid_ == a.Pid();
-  //return this->Ram() == a.Ram();
-  //return this->cpu_percentage_ > a.cpu_percentage_; 
 }
 
 void Process::UpdateTimeInfo() {
