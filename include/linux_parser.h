@@ -19,6 +19,7 @@ const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
 
 std::string FindParameter(std::string filename, int row, int col, char separator);
+std::string FindParameter(std::string filename, std::string param); 
 
 // System
 float MemoryUtilization();

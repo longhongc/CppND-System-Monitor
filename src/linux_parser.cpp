@@ -36,6 +36,23 @@ string LinuxParser::FindParameter(string filename, int row, int col, char separa
     }
     return {}; 
 }
+string LinuxParser::FindParameter(string filename, string param){
+    string line;
+    string key;
+    string value; 
+    std::ifstream filestream(filename);
+    if(filestream.is_open()){
+        while(std::getline(filestream, line)){
+            std::istringstream linestream(line); 
+            linestream >> key >> value; 
+            if(key == param){
+                return value; 
+            }
+
+        }
+    }
+    return {}; 
+}
 
 string LinuxParser::OperatingSystem() {
     string os = LinuxParser::FindParameter(kOSPath, 5, 2, '=');  
@@ -116,7 +133,7 @@ vector<string> LinuxParser::CpuUtilization() {
 }
 
 int LinuxParser::TotalProcesses() {
-    string total = LinuxParser::FindParameter(kProcDirectory + kStatFilename, 9, 2); 
+    string total = LinuxParser::FindParameter(kProcDirectory + kStatFilename, "processes"); 
     if(!total.empty()){
         return stoi(total); 
     }
@@ -124,7 +141,7 @@ int LinuxParser::TotalProcesses() {
 }
 
 int LinuxParser::RunningProcesses() {
-    string running = LinuxParser::FindParameter(kProcDirectory + kStatFilename, 10, 2); 
+    string running = LinuxParser::FindParameter(kProcDirectory + kStatFilename, "procs_running"); 
     if(!running.empty()){
         return stoi(running); 
     }
