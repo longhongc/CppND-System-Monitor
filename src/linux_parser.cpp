@@ -166,7 +166,7 @@ string LinuxParser::Ram(int pid) {
 }
 
 string LinuxParser::Uid(int pid) {
-  string uid = LinuxParser::FindParameter(kProcDirectory + std::to_string(pid) + kStatusFilename, 7, 2); 
+  string uid = LinuxParser::FindParameter(kProcDirectory + std::to_string(pid) + kStatusFilename, "Uid:"); 
   return uid; 
 }
 
