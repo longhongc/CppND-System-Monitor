@@ -171,17 +171,17 @@ string Command(int pid) {
 }
 int main(){
     //std::cout << ChangeTime(26170) << std::endl; 
-    std::cout << OperatingSystem() << std::endl; 
-    std::cout << MemoryUtilization() << std::endl; 
-    std::cout << UpTime(916) << std::endl; 
-    std::cout << Ram(916) << std::endl; 
-    std::cout << Command(916) << std::endl; 
+    //std::cout << OperatingSystem() << std::endl; 
+    //std::cout << MemoryUtilization() << std::endl; 
+    std::cout << UpTime(289) << std::endl; 
+    //std::cout << Ram(916) << std::endl; 
+    //std::cout << Command(916) << std::endl; 
     //auto test_cpu_data = CpuUtilization(); 
     //std::cout << test_cpu_data[0] << std::endl; 
     //std::cout << test_cpu_data[1] << std::endl; 
     //std::cout << test_cpu_data[10] << std::endl; 
-    std::cout << TotalProcesses() << std::endl; 
-    std::cout << RunningProcesses() << std::endl; 
+    //std::cout << TotalProcesses() << std::endl; 
+    //std::cout << RunningProcesses() << std::endl; 
 
     return 0; 
 }

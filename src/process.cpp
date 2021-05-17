@@ -12,6 +12,11 @@ using std::string;
 using std::to_string;
 using std::vector;
 
+Process::Process(int pid): pid_(pid){
+    prevtime_.uptime = LinuxParser::StartTime(pid_);
+    temptime_.uptime = prevtime_.uptime; 
+}
+
 int Process::Pid() const  { return pid_; }
 
 float Process::CpuUtilization() {
@@ -25,7 +30,8 @@ float Process::CpuUtilization() {
   cpu_percentage_ = CPU_Percentage; 
   // temp is ahead of prev a cycle, now is ahead of temp a cycle 
   int temp_interval = nowtime_.uptime-temptime_.uptime; 
-  if (temp_interval > CPU_UTIL_UPDATE_CYCLE){
+  // only activate this when cpu usage is high
+  if (temp_interval > CPU_UTIL_UPDATE_CYCLE && cpu_percentage_ > 0.1){
       prevtime_ = temptime_; 
       temptime_ = nowtime_;
   }
@@ -61,10 +67,6 @@ bool Process::operator==(const Process &a) const {
 }
 
 void Process::UpdateTimeInfo() {
-  if (prevtime_.uptime == 0) {
-    prevtime_.uptime = LinuxParser::StartTime(pid_);
-    temptime_.uptime = prevtime_.uptime; 
-  }
   nowtime_.uptime = LinuxParser::UpTime();
   auto process_data_string_vec = LinuxParser::ProcessUtilization(pid_);
   if (process_data_string_vec.size() < 22){
@@ -72,8 +74,8 @@ void Process::UpdateTimeInfo() {
   }
   process_data_ = Format::ProcessData(process_data_string_vec);
   double used_time = process_data_["utime"] + 
-                     process_data_["stime"];  
-                     //process_data_["cutime"] +
-                     //process_data_["cstime"];
+                     process_data_["stime"] + 
+                     process_data_["cutime"] +
+                     process_data_["cstime"];
   nowtime_.used_time = used_time;
 }

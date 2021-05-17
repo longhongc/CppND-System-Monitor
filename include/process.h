@@ -10,7 +10,7 @@ It contains relevant attributes as shown below
 class Process {
  public:
   Process() {}
-  Process(int pid) : pid_(pid) {}
+  Process(int pid); 
   int Pid() const ;
   std::string User() const ;
   std::string Command() const ;
@@ -29,7 +29,7 @@ class Process {
 
   std::map<std::string, double> process_data_;
   void UpdateTimeInfo();
-  static const int CPU_UTIL_UPDATE_CYCLE = 10;
+  static const int CPU_UTIL_UPDATE_CYCLE = 200;
   struct TimeInfo {
     int uptime{0};
     double used_time{0};
